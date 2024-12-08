@@ -578,6 +578,8 @@ valine:
   # Use Valine visitor count as the page view count
   visitor: false
   option:
+    placeholder: Add your comment...
+    lang: en
 
 # Waline - A simple comment system with backend support fork from Valine
 # https://waline.js.org/
