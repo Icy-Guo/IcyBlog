@@ -46,7 +46,7 @@ Given an integer array `nums`, rotate the array to the right by `k` steps, where
 **Complexity:** Time: _O(n)_, Space: _O(n)_
 
 ```python
-class Solution:
+class Solution(object):
     def rotate(self, nums, k):
         n = len(nums)
         k = k % n
@@ -62,7 +62,7 @@ class Solution:
 **Complexity:** Time: _O(n)_, Space: _O(1)_
 
 ```python
-class Solution:
+class Solution(object):
     def rotate(self, nums, k):
         def reverse(i, j):
             while i < j:
@@ -110,20 +110,13 @@ Return the maximum profit you can achieve from this transaction. If you cannot a
 
 ### **Solution**
 
-#### **Approach** 动态规划
-
-**Idea:** 这道题的本质是寻找数组中的最大差值。思路可以总结为如果某天卖出股票，则该天卖出的最大利润为(该天的股价-前面天数中最小的股价)，然后与已知的最大利润比较，如果大于则更新当前最大利润的值。
+**Idea:** 动态规划。这道题的本质是寻找数组中的最大差值。思路可以总结为如果某天卖出股票，则该天卖出的**最大利润**为**该天的股价-前面天数中最小的股价**，然后与已知的最大利润比较，如果大于则更新当前最大利润的值。
 
 **Complexity:** Time: _O(n)_, Space: _O(1)_
 
 ```python
-class Solution:
 class Solution(object):
     def maxProfit(self, prices):
-        """
-        :type prices: List[int]
-        :rtype: int
-        """
         max_profit = 0
         buy_price = prices[0]
 
@@ -176,17 +169,123 @@ Find and return the **maximum profit** you can achieve.
 
 ### **Solution**
 
-#### **Approach** 贪心算法
-
-**Idea:** 贪心算法指每一步都做出局部最优解，从而达到全局最优解。这道题中具体指：所有上涨的交易日都进行交易（赚到所有可能的利润），所有下降的交易日都不进行交易（永远不亏钱）。这样这道题就可以简化为遍历数组，如果当前天数的价格大于前一天的价格，则将差值累加到最大利润中。
+**Idea:** 贪心算法指每一步都做出局部最优解，从而达到全局最优解。这道题中具体指：**所有上涨的交易日都进行交易（赚到所有可能的利润），所有下降的交易日都不进行交易（永远不亏钱）**。这样这道题就可以简化为遍历数组，如果当前天数的价格大于前一天的价格，则将差值累加到最大利润中。
 
 **Complexity:** Time: _O(n)_, Space: _O(1)_
 
 ```python
-class Solution:
+class Solution(object):
     def maxProfit(self, prices):
         max_profit = 0
         for i in range(1, len(prices)):
             max_profit += max(0, prices[i] - prices[i - 1])
         return max_profit
+```
+
+## [55. Jump Game](https://leetcode.com/problems/jump-game/)
+
+### **Description**
+
+You are given an integer array `nums`. You are initially positioned at the array's first index, and each element in the array represents your maximum jump length at that position.
+
+Return `true` if you can reach the last index, or `false` otherwise.
+
+<details>
+<summary><b>Click to view full description</b></summary>
+
+---
+
+**Example 1:**
+
+- **Input**: `nums = [2, 3, 1, 1, 4]`
+- **Output**: `true`
+
+---
+
+**Example 2:**
+
+- **Input**: `nums = [3, 2, 1, 0, 4]`
+- **Output**: `false`
+
+---
+
+</details>
+
+### **Solution**
+
+**Idea:** 这道题的本质是判断数组中是否存在一个路径可以到达最后一个元素。可以采用贪心算法，不断更新能到达的最远位置。如果当前位置大于能到达的最远位置，则返回 `false`，否则更新能到达的最远位置。
+
+**Complexity:** Time: _O(n)_, Space: _O(1)_
+
+```python
+class Solution(object):
+    def canJump(self, nums):
+        max_length = 0
+
+        for i, jump in enumerate(nums):
+            if i <= max_length:
+                max_length = max (max_length, i + jump)
+            else:
+                return False
+
+        return True
+```
+
+## [45. Jump Game II](https://leetcode.com/problems/jump-game-ii/)
+
+### **Description**
+
+You are given a 0-indexed array of integers `nums` of length `n`. You are initially positioned at `nums[0]`.
+
+Each element `nums[i]` represents the maximum length of a forward jump from index `i`. In other words, if you are at `nums[i]`, you can jump to any `nums[i + j]` where:
+
+- `0 <= j <= nums[i]`
+- `i + j < n`
+
+Return the minimum number of jumps to reach `nums[n - 1]`. The test cases are generated such that you can reach `nums[n - 1]`.
+
+<details>
+<summary><b>Click to view full description</b></summary>
+
+---
+
+**Example 1:**
+
+- **Input**: `nums = [2, 3, 1, 1, 4]`
+- **Output**: `2`
+
+---
+
+**Example 2:**
+
+- **Input**: `nums = [2, 3, 0, 1, 4]`
+- **Output**: `2`
+
+---
+
+</details>
+
+### **Solution**
+
+**Idea:** 这道题的本质是寻找数组中到达最后一个元素的最小跳跃次数。可以采用贪心算法，将问题想象成搭桥过河，在可以选择的桥中，选择**右端点最远**的桥。本题的思路有些难懂，需要仔细思考每个变量的含义。
+
+![leetcode45](/img/leetcode45.png)
+
+这里要注意一个细节，循环时 `i` 只循环到 `n-2`。因为开始的时候边界是第 0 个位置，`steps` 已经加 1 了，所以假如最后一步从 `n-2` 跳到 `n-1`，那么 `steps` 就不需要再加 1 了。所以如果 `i` 循环到 `n-1`，那么 `steps` 就会额外再加 1 导致出错。
+
+**Complexity:** Time: _O(n)_, Space: _O(1)_
+
+```python
+class Solution(object):
+    def jump(self, nums):
+        max_length, cur_right, step = 0, 0, 0
+
+        for i in range(len(nums) - 1):
+            if i <= max_length:
+                max_length = max (max_length, i + nums[i])
+                if i == cur_right:
+                    cur_right = max_length
+                    step += 1
+
+        return step
 ```
