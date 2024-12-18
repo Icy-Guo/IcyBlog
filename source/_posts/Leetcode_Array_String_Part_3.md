@@ -331,7 +331,7 @@ Given two integer arrays `gas` and `cost`, return the starting gas station's ind
 
 ![gas-station](/img/leetcode134.png)
 
-如果 gas 元素和大于等于 cost 元素和，则一定存在一个起点，使得从该起点出发，能够绕一圈回到起点，并且油量不会耗尽。该起点即为折线图中油量最低点。
+如果 `gas` 元素和大于等于 `cost` 元素和，则一定存在一个起点，使得从该起点出发，能够绕一圈回到起点，并且油量不会耗尽。该起点即为折线图中油量最低点（可以想象最低点和 X 轴的高度一致，则从最低点开始，油量一定不会耗尽）。
 
 **Complexity:** Time: _O(n)_, Space: _O(1)_
 
