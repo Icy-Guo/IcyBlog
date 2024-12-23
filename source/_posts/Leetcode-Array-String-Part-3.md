@@ -41,7 +41,7 @@ If there are several possible values for `h`, the maximum one is taken as the h-
 
 ### **Solution**
 
-**Approach 1:** 排序
+#### **Approach 1:** 排序
 
 **Idea:** 将数组从大到小排序后，遍历找到第一个满足条件的 `h`。根据 H 指数的定义，如果当前 H 指数为 `h` 并且在遍历过程中找到当前值 `citations[i] > h`，则说明我们**找到了一篇被引用了至少 `h+1` 次的论文**，所以将现有的 `h` 值加 1。继续遍历直到 `h` 无法继续增大。最后返回 `h` 作为最终答案。
 
@@ -63,7 +63,7 @@ class Solution(object):
         return h
 ```
 
-**Approach 2:** 计数排序
+#### **Approach 2:** 计数排序
 
 **Idea:** 根据上述解法我们发现，最终的时间复杂度与排序算法的时间复杂度有关，所以我们可以使用计数排序算法，新建并维护一个数组 `counter` 用来记录当前引用次数的论文有几篇。
 
@@ -95,7 +95,7 @@ class Solution(object):
         return 0
 ```
 
-**Approach 3:** 二分查找
+#### **Approach 3:** 二分查找
 
 **Idea:** 我们需要找到一个值 `h`，它是满足「有 `h` 篇论文的引用次数至少为 `h`」的最大值。小于等于 `h` 的所有值 `x` 都满足这个性质，而大于 `h` 的值都不满足这个性质。所以这个问题可以用二分搜索来解决。
 
@@ -236,7 +236,7 @@ You must write an algorithm that runs in _O(n)_ time and without using the divis
 
 ### **Solution**
 
-**Approach 1:** 前缀积和后缀积
+#### **Approach 1:** 前缀积和后缀积
 
 **Idea:** 我们不必将所有数字的乘积除以给定索引处的数字得到相应的答案，而是利用索引 `左侧所有数字的乘积` 和 `右侧所有数字的乘积`（即前缀与后缀）相乘得到答案。
 
@@ -266,7 +266,7 @@ class Solution(object):
         return answer
 ```
 
-**Approach 2:** 空间优化
+#### **Approach 2:** 空间优化
 
 **Idea:** 我们可以直接将答案数组作为前缀数组，这样我们就可以省略额外的空间。
 
@@ -324,8 +324,6 @@ Given two integer arrays `gas` and `cost`, return the starting gas station's ind
 </details>
 
 ### **Solution**
-
-**Approach:** 折线图理解
 
 **Idea:** 我们可以将问题转化为一个折线图问题，其中 `gas[i]` 表示在第 `i` 个加油站的油量，`cost[i]` 表示从第 `i` 个加油站到第 `i+1` 个加油站的油量消耗。我们需要找到一个起点，使得从该起点出发，能够绕一圈回到起点，并且油量不会耗尽。
 
@@ -388,7 +386,7 @@ Return the minimum number of candies you need to have to distribute to the child
 
 ### **Solution**
 
-**Approach 1:** 左右遍历
+#### **Approach 1:** 左右遍历
 
 **Idea:** 我们可以从左到右遍历一次，确保每个孩子都比左边的孩子多一个糖果。然后从右到左遍历一次，确保每个孩子都比右边的孩子多一个糖果。最后遍历数组取最大值，就会同时满足左规则和右规则。
 
@@ -423,7 +421,7 @@ class Solution(object):
         return answer
 ```
 
-**Approach 2:** 常数空间遍历
+#### **Approach 2:** 常数空间遍历
 
 **Complexity:** Time: _O(n)_, Space: _O(1)_
 
