@@ -62,7 +62,7 @@ favicon: /img/favicon.png
 
 avatar:
   img: /img/panda.jpeg
-  effect: false
+  effect: true
 
 # Disable all banner images
 disable_top_img: false
