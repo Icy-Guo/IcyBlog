@@ -1,5 +1,5 @@
 ---
-title: Leetcode-Hashmap-Part-2
+title: Leetcode Hashmap Part 2
 date: 2025-01-04 11:16:38
 tags:
   - Study
