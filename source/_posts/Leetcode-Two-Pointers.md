@@ -223,24 +223,25 @@ Return the maximum amount of water a container can store.
 
 ```python
 class Solution(object):
-    def lengthOfLongestSubstring(self, s):
+    def maxArea(self, height):
         """
-        :type s: str
+        :type height: List[int]
         :rtype: int
         """
         i = 0
-        j = 0
+        j = len(height) - 1
         ans = 0
-        sub = list()
 
-        while j < len(s):
-            while s[j] in sub:
-                sub.pop(0)
+        while i < j:
+            h = min(height[i], height[j])
+            water = h * (j - i)
+            if water > ans:
+                ans = water
+            if height[i] < height[j]:
                 i += 1
-            sub.append(s[j])
-            ans = max(ans, j - i + 1)
-            j += 1
-
+            else:
+                j -= 1
+               
         return ans
 ```
 
