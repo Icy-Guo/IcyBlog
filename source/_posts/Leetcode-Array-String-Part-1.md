@@ -263,7 +263,7 @@ The majority element is the element that appears more than `⌊n / 2⌋` times. 
 
 ### **Solution**
 
-#### **Approach 1** 哈希表
+#### **Approach 1:** 哈希表
 
 **Idea:** 这道题直觉上很容易想到哈希表，用哈希表统计每个元素出现的次数，然后遍历哈希表，找到出现次数大于 `n // 2` 的元素。创建字典时 `defaultdict` 的用法值得积累。
 
@@ -286,7 +286,7 @@ class Solution:
         return 0
 ```
 
-#### **Approach 2** 摩尔投票法
+#### **Approach 2:** 摩尔投票法
 
 **Idea:** 摩尔投票法是一种高效的算法，用于解决寻找多数元素的问题，是本题的最优解。它的核心思想是通过不断消除不相同的元素，最终剩下的元素就是多数元素。当 `count` 为 0 时，`candidate` 更新为当前元素。然后继续遍历，如果当前元素和 `candidate` 相同，`count` 加 1，否则 `count` 减 1。最后剩下的 `candidate` 就是多数元素。
 
