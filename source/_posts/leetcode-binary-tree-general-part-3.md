@@ -1,5 +1,5 @@
 ---
-title: leetcode-binary-tree-general-part-3
+title: Leetcode Binary Tree General Part 3
 date: 2025-01-16 22:43:57
 tags:
   - Study
