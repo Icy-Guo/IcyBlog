@@ -1,6 +1,6 @@
 ---
 title: Leetcode Matrix
-date: 2024-12-28 22:41:47
+date: 2024-12-24 22:41:47
 tags:
   - Study
   - Leetcode
@@ -10,15 +10,13 @@ top_img: /img/leetcode.jpeg
 cover: /img/leetcode.jpeg
 ---
 
-## [36. Valid Sudoku](https://leetcode.com/problems/valid-sudoku/)
+## [73. Set Matrix Zeroes](https://leetcode.com/problems/set-matrix-zeroes/)
 
 ### **Description**
 
-Determine if a `9 x 9` Sudoku board is valid. Only the filled cells need to be validated according to the following rules:
+Given an `m x n` integer matrix `matrix`, if an element is `0`, set its entire row and column to `0`s.
 
-- Each row must contain the digits `1-9` without repetition.
-- Each column must contain the digits `1-9` without repetition.
-- Each of the nine `3 x 3` sub-boxes of the grid must contain the digits `1-9` without repetition.
+You must do it in place.
 
 <details>
 <summary><b>Click to view full description</b></summary>
@@ -27,15 +25,15 @@ Determine if a `9 x 9` Sudoku board is valid. Only the filled cells need to be v
 
 **Example 1:**
 
-- **Input**: `board = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]`
-- **Output**: `true`
+- **Input**: `matrix = [[1,1,1],[1,0,1],[1,1,1]]`
+- **Output**: `[[1,0,1],[0,0,0],[1,0,1]]`
 
 ---
 
 **Example 2:**
 
-- **Input**: `board = [["8","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]`
-- **Output**: `false`
+- **Input**: `matrix = [[0,1,2,0],[3,4,5,2],[1,3,1,5]]`
+- **Output**: `[[0,0,0,0],[0,4,5,0],[0,3,1,0]]`
 
 ---
 
@@ -43,33 +41,72 @@ Determine if a `9 x 9` Sudoku board is valid. Only the filled cells need to be v
 
 ### **Solution**
 
-**Idea:** 使用三个矩阵分别记录 **行**、**列**和 **3x3 子数独**中每个数字出现的次数。
+#### **Approach 1:** 标记数组
 
-**Complexity:** Time: _O(1)_, Space: _O(1)_ (因为 board 是 9x9 的固定大小)
+**Idea:** 使用两个布尔数组分别记录矩阵的**行**和**列**是否需要被置零。
+
+**Complexity:** Time: _O(m \* n)_, Space: _O(m + n)_
 
 ```python
 class Solution(object):
-    def isValidSudoku(self, board):
+    def setZeroes(self, matrix):
         """
-        :type board: List[List[str]]
-        :rtype: bool
+        :type matrix: List[List[int]]
+        :rtype: None Do not return anything, modify matrix in-place instead.
         """
-        rows = [[0] * 9 for _ in range(9)]
-        columns = [[0] * 9 for _ in range(9)]
-        boxes = [[[0] * 9 for _ in range(3)] for _ in range(3)]
+        m = len(matrix)
+        n = len(matrix[0])
+        rows = [0] * m
+        columns = [0] * n
 
-        for i in range(9):
-            for j in range(9):
-                num = board[i][j]
-                if num != '.':
-                    num = int(num) - 1
-                    rows[i][num] += 1
-                    columns[j][num] += 1
-                    boxes[i // 3][j // 3][num] += 1
-                    if rows[i][num] > 1 or columns[j][num] > 1 or boxes[i // 3][j // 3][num] > 1:
-                        return False
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j] == 0:
+                    rows[i] = True
+                    columns[j] = True
 
-        return True
+        for i in range(m):
+            for j in range(n):
+                if rows[i] or columns[j]:
+                    matrix[i][j] = 0
+
+        return matrix
+```
+
+#### **Approach 2:** 使用矩阵的第一行和第一列来标记
+
+**Idea:** 使用矩阵的**第一行**和**第一列**来标记需要被置零的行和列，可以达到 _O(1)_ 的额外空间。但这样会导致原数组的第一行和第一列被修改，无法记录它们是否原本包含 `0`。因此我们需要额外使用两个标记变量分别记录第一行和第一列是否原本包含 `0`。
+
+**Complexity:** Time: _O(m \* n)_, Space: _O(1)_
+
+```python
+class Solution:
+    def setZeroes(self, matrix):
+        """
+        :type matrix: List[List[int]]
+        :rtype: None Do not return anything, modify matrix in-place instead.
+        """
+        m, n = len(matrix), len(matrix[0])
+        flag_col0 = any(matrix[i][0] == 0 for i in range(m))
+        flag_row0 = any(matrix[0][j] == 0 for j in range(n))
+
+        for i in range(1, m):
+            for j in range(1, n):
+                if matrix[i][j] == 0:
+                    matrix[i][0] = matrix[0][j] = 0
+
+        for i in range(1, m):
+            for j in range(1, n):
+                if matrix[i][0] == 0 or matrix[0][j] == 0:
+                    matrix[i][j] = 0
+
+        if flag_col0:
+            for i in range(m):
+                matrix[i][0] = 0
+
+        if flag_row0:
+            for j in range(n):
+                matrix[0][j] = 0
 ```
 
 ## [54. Spiral Matrix](https://leetcode.com/problems/spiral-matrix/)
@@ -188,6 +225,129 @@ class Solution(object):
                 matrix[i][j], matrix[n - j - 1][i], matrix[n - i - 1][n - j - 1], matrix[j][n - i - 1] = matrix[n - j - 1][i], matrix[n - i - 1][n - j - 1], matrix[j][n - i - 1], matrix[i][j]
 
         return matrix
+```
+
+## [240. Search a 2D Matrix II](https://leetcode.com/problems/search-a-2d-matrix-ii/)
+
+### **Description**
+
+Write an efficient algorithm that searches for a value target in an `m x n` integer matrix. This matrix has the following properties:
+
+- Integers in each row are sorted in ascending order from left to right.
+- Integers in each column are sorted in ascending order from top to bottom.
+
+<details>
+<summary><b>Click to view full description</b></summary>
+
+---
+
+**Example 1:**
+
+- **Input**: `matrix = [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target = 5`
+- **Output**: `true`
+
+---
+
+**Example 2:**
+
+- **Input**: `matrix = [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target = 20`
+- **Output**: `false`
+
+---
+
+</details>
+
+### **Solution**
+
+**Idea:** 从矩阵的 **右上角** 开始搜索，如果当前元素大于目标值，则向左移动，如果当前元素小于目标值，则向下移动。选择右上角作为起点是因为该位置的元素是 **该行最大的，是该列最小的**，不会漏掉某个元素。同样也可以选择左下角作为起点。
+
+**Complexity:** Time: _O(m + n)_, Space: _O(1)_
+
+```python
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        rows = len(matrix)
+        cols = len(matrix[0])
+        row = 0
+        col = cols - 1
+
+        while row < rows and col >= 0:
+            if matrix[row][col] == target:
+                return True
+            if matrix[row][col] > target:
+                col -= 1
+            if matrix[row][col] < target:
+                row += 1
+        
+        return False
+```
+
+---
+
+`Top Interview 150 补充`
+
+---
+
+## [36. Valid Sudoku](https://leetcode.com/problems/valid-sudoku/)
+
+### **Description**
+
+Determine if a `9 x 9` Sudoku board is valid. Only the filled cells need to be validated according to the following rules:
+
+- Each row must contain the digits `1-9` without repetition.
+- Each column must contain the digits `1-9` without repetition.
+- Each of the nine `3 x 3` sub-boxes of the grid must contain the digits `1-9` without repetition.
+
+<details>
+<summary><b>Click to view full description</b></summary>
+
+---
+
+**Example 1:**
+
+- **Input**: `board = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]`
+- **Output**: `true`
+
+---
+
+**Example 2:**
+
+- **Input**: `board = [["8","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]]`
+- **Output**: `false`
+
+---
+
+</details>
+
+### **Solution**
+
+**Idea:** 使用三个矩阵分别记录 **行**、**列**和 **3x3 子数独**中每个数字出现的次数。
+
+**Complexity:** Time: _O(1)_, Space: _O(1)_ (因为 board 是 9x9 的固定大小)
+
+```python
+class Solution(object):
+    def isValidSudoku(self, board):
+        """
+        :type board: List[List[str]]
+        :rtype: bool
+        """
+        rows = [[0] * 9 for _ in range(9)]
+        columns = [[0] * 9 for _ in range(9)]
+        boxes = [[[0] * 9 for _ in range(3)] for _ in range(3)]
+
+        for i in range(9):
+            for j in range(9):
+                num = board[i][j]
+                if num != '.':
+                    num = int(num) - 1
+                    rows[i][num] += 1
+                    columns[j][num] += 1
+                    boxes[i // 3][j // 3][num] += 1
+                    if rows[i][num] > 1 or columns[j][num] > 1 or boxes[i // 3][j // 3][num] > 1:
+                        return False
+
+        return True
 ```
 
 ## [73. Set Matrix Zeroes](https://leetcode.com/problems/set-matrix-zeroes/)

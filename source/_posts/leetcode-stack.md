@@ -1,6 +1,6 @@
 ---
 title: Leetcode Stack
-date: 2025-01-08 09:25:15
+date: 2025-02-05 09:25:15
 tags:
   - Study
   - Leetcode
@@ -65,66 +65,6 @@ class Solution:
         return not stack
 ```
 
-## [71. Simplify Path](https://leetcode.com/problems/simplify-path/)
-
-### **Description**
-
-Given a string `path`, which is an absolute path (starting with a slash `/`) to a file or directory in a Unix-style file system, convert it to the simplified canonical path.
-
-In a Unix-style file system, a period `.` refers to the current directory, a double period `..` refers to the directory up a level, and any multiple consecutive slashes (e.g., `///`) are treated as a single slash `/`. For this problem, any other format of periods such as `...` or `..a` are treated as file/directory names.
-
-The canonical path should have the following format:
-
-- The path starts with a single slash `/`.
-- Any two directories are separated by a single slash `/`.
-- The path does not end with a trailing `/`.
-- The path only contains the directories on the path from the root directory to the target file or directory (i.e., no period `.` or double period `..`).
-
-Return the simplified canonical path.
-
-<details>
-<summary><b>Click to view full description</b></summary>
-
----
-
-**Example 1:**
-
-- **Input**: `path = "/home/"`
-- **Output**: `"/home"`
-
----
-
-**Example 2:**
-
-- **Input**: `path = "/../"`
-- **Output**: `"/"`
-
----
-
-</details>
-
-### **Solution**
-
-**Idea:** 使用栈来处理路径，遇到 `.` 或 `..` 时，根据情况进行处理。
-
-**Complexity:** Time: _O(n)_, Space: _O(n)_
-
-```python
-class Solution:
-    def simplifyPath(self, path: str) -> str:
-        names = path.split("/")
-        stack = []
-        for name in names:
-            if name == '..':
-                if stack:
-                    stack.pop()
-            elif name == '.':
-                continue
-            elif name:
-                stack.append(name)
-        return "/" + "/".join(stack)
-```
-
 ## [155. Min Stack](https://leetcode.com/problems/min-stack/)
 
 ### **Description**
@@ -184,6 +124,179 @@ class MinStack:
 
     def getMin(self) -> int:
         return self.min_stack[-1]
+```
+
+## [394. Decode String](https://leetcode.com/problems/decode-string/)
+
+### **Description**
+
+Given an encoded string, return its decoded string.
+
+The encoding rule is: `k[encoded_string]`, where the `encoded_string` inside the square brackets is being repeated exactly `k` times. Note that `k` is guaranteed to be a positive integer.
+
+You may assume that the input string is always valid; there are no extra white spaces, square brackets are well-formed, etc. Furthermore, you may assume that the original data does not contain any digits and that digits are only for those repeat numbers, `k`. For example, there will not be input like `3a` or `2[4]`.
+
+<details>
+<summary><b>Click to view full description</b></summary>
+
+---
+
+**Example 1:**
+
+- **Input**: `s = "3[a2[c]]"`
+- **Output**: `"accaccacc"`
+
+---
+
+**Example 2:**
+
+- **Input**: `s = "3[a2[c]]"`
+- **Output**: `"accaccacc"`
+
+---
+
+</details>
+
+### **Solution**
+
+**Idea:** 使用栈来处理编码字符串。遇到 `]` 时，将栈顶的元素弹出，直到遇到 `[`。然后将 `[` 和 `]` 之间的字符串重复 `num` 次，并将结果压入栈中。最后，将栈中的元素拼接成结果。
+
+**Complexity:** Time: _O(n)_, Space: _O(n)_
+
+```python
+class Solution:
+    def decodeString(self, s: str) -> str:
+        stack = []
+
+        for c in s:
+            if c == ']':
+                temp = ''
+                while stack[-1] != '[':
+                    temp = stack.pop() + temp
+                stack.pop()
+                num = ''
+                while stack and stack[-1].isdigit():
+                    num = stack.pop() + num
+                stack.append(int(num) * temp)
+            else:
+                stack.append(c)
+
+        return ''.join(stack)
+```
+
+## [739. Daily Temperatures](https://leetcode.com/problems/daily-temperatures/)
+
+### **Description**
+
+Given a list of daily temperatures `temperatures`, return a list such that, for each day in the input, tells you how many days you would have to wait until a warmer temperature. If there is no future day for which this is possible, put `0` instead.
+
+<details>
+<summary><b>Click to view full description</b></summary>
+
+---
+
+**Example 1:**
+
+- **Input**: `temperatures = [73,74,75,71,69,72,76,73]`
+- **Output**: `[1,1,4,2,1,1,0,0]`
+
+---
+
+**Example 2:**
+
+- **Input**: `temperatures = [30,40,50,60]`
+- **Output**: `[1,1,1,0]`
+
+---
+
+</details>
+
+### **Solution**
+
+**Idea:** 使用栈来处理每日温度。值得注意的一点是，栈中存储的是温度对应的 **索引**，而不是温度本身。这是因为我们需要计算等待天数需要通过索引相减来得到。如果当前索引对应的温度高于栈顶索引对应的温度，则将栈顶索引弹出，并计算等待天数。最后，将当前索引压入栈中。
+
+**Complexity:** Time: _O(n)_, Space: _O(n)_
+
+```python
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        n = len(temperatures)
+        ans = [0] * n
+        stack = []
+
+        for i in range(n):
+            while stack and temperatures[i] > temperatures[stack[-1]]:
+                index = stack.pop()
+                ans[index] = i - index
+            stack.append(i)
+
+        return ans
+```
+
+---
+
+`Top Interview 150 补充`
+
+---
+
+## [71. Simplify Path](https://leetcode.com/problems/simplify-path/)
+
+### **Description**
+
+Given a string `path`, which is an absolute path (starting with a slash `/`) to a file or directory in a Unix-style file system, convert it to the simplified canonical path.
+
+In a Unix-style file system, a period `.` refers to the current directory, a double period `..` refers to the directory up a level, and any multiple consecutive slashes (e.g., `///`) are treated as a single slash `/`. For this problem, any other format of periods such as `...` or `..a` are treated as file/directory names.
+
+The canonical path should have the following format:
+
+- The path starts with a single slash `/`.
+- Any two directories are separated by a single slash `/`.
+- The path does not end with a trailing `/`.
+- The path only contains the directories on the path from the root directory to the target file or directory (i.e., no period `.` or double period `..`).
+
+Return the simplified canonical path.
+
+<details>
+<summary><b>Click to view full description</b></summary>
+
+---
+
+**Example 1:**
+
+- **Input**: `path = "/home/"`
+- **Output**: `"/home"`
+
+---
+
+**Example 2:**
+
+- **Input**: `path = "/../"`
+- **Output**: `"/"`
+
+---
+
+</details>
+
+### **Solution**
+
+**Idea:** 使用栈来处理路径，遇到 `.` 或 `..` 时，根据情况进行处理。
+
+**Complexity:** Time: _O(n)_, Space: _O(n)_
+
+```python
+class Solution:
+    def simplifyPath(self, path: str) -> str:
+        names = path.split("/")
+        stack = []
+        for name in names:
+            if name == '..':
+                if stack:
+                    stack.pop()
+            elif name == '.':
+                continue
+            elif name:
+                stack.append(name)
+        return "/" + "/".join(stack)
 ```
 
 ## [150. Evaluate Reverse Polish Notation](https://leetcode.com/problems/evaluate-reverse-polish-notation/)
