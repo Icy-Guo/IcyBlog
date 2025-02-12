@@ -1,5 +1,5 @@
 ---
-title: interview-javascript
+title: 前端面试题准备 - JavaScript
 date: 2025-02-11 23:23:40
 tags:
   - Interview
