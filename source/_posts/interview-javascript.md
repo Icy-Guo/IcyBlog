@@ -267,3 +267,191 @@ console.log(obj1);  // { a: 1, b: { c: 2 } }
 console.log(obj2);  // { a: 10, b: { c: 20 } }
 ```
 
+## 闭包
+
+闭包（`Closure`）是指函数能够访问并记住其词法作用域（`lexical scope`）外的变量，即使这个函数在其定义时的作用域之外执行。简单说，闭包是函数与其周围状态的组合。
+
+示例：
+
+```js
+function createCounter() {
+  let count = 0; // 闭包保护的私有变量
+  return {
+    increment: function() {
+      count++;
+      return count;
+    },
+    getValue: function() {
+      return count;
+    }
+  };
+}
+
+const counter = createCounter();
+console.log(counter.increment()); // 1
+console.log(counter.increment()); // 2
+console.log(counter.getValue());  // 2
+```
+
+1. **闭包的特性**：
+- **函数嵌套**：闭包通常由一个内部函数形成，该函数被定义在另一个函数内部。
+- **访问外部作用域**：内部函数可以访问外部函数的变量，即使外部函数已经执行完毕。
+- **变量持久化**：由于闭包使变量保存在内存中，不会被垃圾回收机制清除，因此它可以模拟私有变量。
+
+2. **闭包的优点**：
+- **延长变量的生命周期**：闭包可以访问函数内部的变量，即使函数执行完毕，这些变量仍然存在。
+- **模拟私有变量**：闭包可以模拟私有变量，通过闭包保护的变量只能在函数内部访问，外部无法直接访问。
+
+3. **闭包的缺点**：
+- **内存泄漏**：闭包会占用内存，如果滥用闭包，可能会导致内存泄漏。
+- **性能问题**：闭包的访问和修改操作相对较慢，因为它们需要额外的函数调用和内存访问。
+
+4. **常见场景**：
+- **防抖**：短时间内多次触发时，只执行最后一次。通过 `setTimeout` 清除上一次定时器。
+- **节流**：限制高频触发事件的执行频率。记录 `lastTime`，保证一定时间间隔执行一次。
+- **数据私有化**：模拟私有变量，防止外部访问。使用闭包保存变量，仅暴露访问方法。
+- **回调函数保持状态**：让回调函数记住外部作用域的变量。通过返回一个函数，函数内部可访问外部变量。
+- **函数柯里化**：把多参数函数拆分为多个单参数调用。递归返回新函数，直到所有参数传递完成。
+
+## 跨域怎么解决
+
+当一个请求 url 的 协议、域名、端口三者之间任意一个与当前页面 url 不同即为 **跨域**。
+
+**解决跨域**：
+
+1. **JSONP（JSON with Padding）**：
+
+**JSONP** 是一种通过 `<script>` 标签来绕过跨域限制的解决方案。它利用了 `<script>` 标签的 src 属性可以访问任何域的特性。
+
+2. **CORS（Cross-Origin Resource Sharing）**：
+
+**CORS** 是一种现代的跨域解决方案，通过在服务器端设置特定的 HTTP 头来允许跨域请求。
+
+- **普通跨域请求**：只需服务端设置 `Access-Control-Allow-Origin` 即可，前端无须设置。
+
+- **带cookie的跨域请求**：前端设置 `withCredentials` 为 `true`，后端设置 `Access-Control-Allow-Credentials` 为 `true`。同时 `Access-Control-Allow-Origin` 不能设置为 `*`，必须明确指定域名。
+
+3. **代理服务器**：
+
+在自己的服务器上创建一个代理，由服务器转发请求。
+
+4. **postMessage**：
+
+`postMessage` 是 HTML5 提供的一种跨域通信机制，允许在不同窗口之间传递消息。
+
+## 防抖和节流
+
+1. **防抖（debounce）**：
+
+在触发事件后的一段时间内，如果再次触发事件，则重新计时。只有在指定时间内没有再次触发事件，才会执行函数。
+
+应用场景：搜索框输入查询、窗口大小调整、表单验证、按钮提交事件。
+
+示例：
+
+```js
+function debounce(fn, delay) {
+    let timer = null;
+    
+    return function(...args) {
+        // 如果已经设定过定时器，则清空上一次的定时器
+        if (timer) {
+            clearTimeout(timer);
+        }
+        
+        // 设定新的定时器
+        timer = setTimeout(() => {
+            fn.apply(this, args);
+        }, delay);
+    }
+}
+
+// 使用示例
+const handleInput = debounce((e) => {
+    console.log('搜索内容：', e.target.value);
+}, 500);
+
+// 绑定到输入框
+input.addEventListener('input', handleInput);
+```
+
+2. **节流（throttle）**：
+
+节流（`throttle`）在指定时间间隔内，无论触发多少次事件，只执行一次函数。
+
+应用场景：滚动事件处理、页面 resize 事件、拖拽事件、游戏中的按键事件。
+
+示例：
+
+```js
+function throttle(fn, delay) {
+    let timer = null;
+    
+    return function(...args) {
+        // 如果已有定时器在执行，则直接返回
+        if (timer) {
+            return;
+        }
+        
+        // 设定新的定时器
+        timer = setTimeout(() => {
+            fn.apply(this, args);
+            timer = null;  // 执行完重置定时器
+        }, delay);
+    }
+}
+
+// 使用示例
+const handleScroll = throttle(() => {
+    console.log('滚动位置：', window.scrollY);
+}, 200);
+
+// 绑定到滚动事件
+window.addEventListener('scroll', handleScroll);
+```
+
+3. **防抖和节流的区别**：
+  
+假设 `delay` 都是 `1000ms`
+
+防抖：连续触发事件，只在最后一次触发后的 `1000ms` 后执行一次
+防抖时间轴：点击 - 点击 - 点击 - `1000ms` - 执行
+
+节流：连续触发事件，每隔 `1000ms` 执行一次
+节流时间轴：点击 - 执行 - `1000ms` - 执行 - `1000ms` - 执行
+
+选择使用防抖还是节流的依据：
+
+- 如果你需要等待用户完成操作后再执行函数，用防抖。例如：等用户输入完成后再搜索。
+- 如果你需要保证一定时间内只执行一次函数，用节流。例如：滚动时每隔一段时间计算一次位置。
+
+## Promise 是什么？有哪些 API？
+
+`Promise` 是 JavaScript 中用于处理异步操作的对象。它代表了一个异步操作的最终完成（或失败）及其结果值。
+
+`Promise` 构造函数接受一个函数作为参数，该函数的两个参数分别是 `resolve` 和 `reject`。
+
+`resolve` 函数将 `Promise` 对象的状态从 `pending` 变为 `fulfilled`，并将结果值传递给 `Promise` 对象。
+
+`reject` 函数将 `Promise` 对象的状态从 `pending` 变为 `rejected`，并将失败原因传递给 `Promise` 对象。
+
+`Promise` 有三种状态：
+
+- `pending`：初始状态，表示异步操作正在进行中。
+- `fulfilled`：表示异步操作成功完成。
+- `rejected`：表示异步操作失败。
+
+`Promise` 的实例方法：
+
+- `Promise.prototype.then()`：`then` 方法定义在 `Promise` 的原型上，用于处理异步操作成功的情况。它返回的是一个新的 `Promise` 对象，可以链式调用。
+- `Promise.prototype.catch()`：`catch` 方法定义在 `Promise` 的原型上，用于处理异步操作失败的情况。
+- `Promise.prototype.finally()`：`finally` 方法定义在 `Promise` 的原型上，用于处理异步操作无论成功或失败的情况。
+
+`Promise` 的静态方法：
+
+- `Promise.all()`：用于处理多个 `Promise` 对象。它返回的是一个新的 `Promise` 对象，只有当所有 `Promise` 对象都成功时，才会执行 `then` 方法。如果其中有一个 `Promise` 对象失败，则返回的 `Promise` 对象会立即失败，并执行 `catch` 方法。
+- `Promise.race()`：用于处理多个 `Promise` 对象。它返回的是一个新的 `Promise` 对象，只要有一个 `Promise` 对象成功或失败，就会执行 `then` 或 `catch` 方法。
+- `Promise.allSettled()`：用于处理多个 `Promise` 对象。它返回的是一个新的 `Promise` 对象，只有当所有 `Promise` 对象都成功或失败时，才会执行 `then` 或 `catch` 方法。
+- `Promise.resolve()`：用于将一个值转换为 `Promise` 对象。
+- `Promise.reject()`：用于将一个值转换为 `Promise` 对象，并立即失败。
+
