@@ -456,3 +456,155 @@ window.addEventListener('scroll', handleScroll);
 - `Promise.resolve()`：用于将一个值转换为 `Promise` 对象。
 - `Promise.reject()`：用于将一个值转换为 `Promise` 对象，并立即失败。
 
+## 懒加载
+
+懒加载（`lazy loading`）是一种优化技术，用于 **延迟加载资源** （如图片、视频、脚本等），直到用户需要它们时才加载。这样可以减少初始加载时间，提高页面加载性能。
+
+**基本流程**：
+
+- **初始加载**：只加载页面渲染所需的最小资源（如关键的 HTML、CSS 和 JavaScript）。
+- **用户触发**：当用户滚动到页面的某个区域或进行某些交互时，才触发其他资源的加载。
+- **动态加载**：在用户需要时，加载剩余的资源（如图片、视频、额外的 JavaScript 模块等）。
+
+**应用场景**：
+
+- **图片懒加载**：图片通常是网页中资源加载的瓶颈，尤其是在长页面上。当用户滚动到图片所在位置时，再加载图片资源，而不是在页面加载时一次性加载所有图片。可以使用 `IntersectionObserver` 监听图片是否进入可视区域。
+- **JavaScript 模块懒加载**：使用懒加载技术，只有在用户触发某个操作（如点击按钮、滚动到某个位置）时才加载某些 JavaScript 文件，这对于单页应用（SPA）尤其重要。可以使用 `Webpack` 的 `import()` 函数来实现。
+- **路由懒加载**：在单页应用中，路由通常是懒加载的，只有在用户访问某个路由时才加载该路由的组件。可以使用 `Webpack` 的 `import()` 函数来实现。
+
+**优化方法**：
+
+- **占位符**：在图片未加载时，使用低分辨率图片占位，等图片加载后再替换为高分辨率图片。
+- **预加载**：在用户需要之前，提前加载资源。
+- **缓存**：使用缓存来存储加载过的资源，减少重复加载。
+
+## 原型和原型链
+
+**原型**：每个 JavaScript 对象都有一个属性 `__proto__`，指向该对象的原型。原型是另一个对象，它定义了该对象的共享属性和方法。
+
+**原型链**：每个对象都有一个原型对象，原型对象也是一个对象，也有自己的原型对象，这样就形成了一条链。我们称之为原型链，表示对象及其原型之间的继承关系。
+
+当你访问对象的某个属性时，JavaScript 引擎会沿着原型链查找该属性。如果在对象本身找不到，就会到它的原型上查找，直到找到为止，或者最终达到 `Object.prototype`（所有对象的最终原型），如果还是没有找到，返回 `undefined`。
+
+## 发布订阅设计模式
+
+发布订阅模式（Publish-Subscribe Pattern）是一种常见的设计模式，广泛应用于前端开发中，旨在实现 **对象之间的松耦合通信**。在这种模式下，发布者（`Publisher`）和订阅者（`Subscriber`）通过一个中介（通常称为事件总线或事件通道）进行消息传递，彼此之间无需直接依赖。这使得系统更具可扩展性和可维护性。
+
+**概念**：
+
+- **事件总线**：连接发布者和订阅者的中介，管理订阅关系并分发消息。
+- **订阅者**：对特定消息感兴趣的对象，负责接收并处理消息。
+- **发布者**：负责发布消息的对象。
+
+**流程**：
+
+- **订阅者** 通过 **事件总线** 订阅特定类型的消息。
+- **发布者** 创建消息并发送到 **事件总线**。
+- **事件总线** 将消息分发给所有相关的 **订阅者**。
+- **订阅者** 接收并处理消息。
+
+**优点**：
+
+- **松耦合**：发布者和订阅者之间没有直接依赖关系，可以独立变化。
+- **可扩展性**：可以方便地添加新的订阅者和发布者。
+- **灵活性**：可以随时订阅和取消订阅消息。
+
+**注意事项**：
+
+- **避免内存泄漏**：如果订阅者不再需要消息，应及时取消订阅，释放资源。
+- **避免重复订阅**：确保订阅者不会重复订阅同一消息，否则多次触发。
+- **避免循环依赖**：确保发布者和订阅者之间不会形成循环依赖，否则会导致死循环。例如：订阅者A通知发布者B，发布者B又通知订阅者A。
+
+**示例**：
+
+假设我们有一个包子铺（`baoziShop`），当有新包子上架时，店主希望通知所有订阅者。 我们可以使用发布订阅模式来实现这一功能：
+
+```js
+// 定义事件通道
+const event = {
+  listenList: {}, // 存放订阅者的回调函数
+
+  /**
+   * 订阅消息
+   * @param {string} key 消息类型
+   * @param {Function} fn 回调函数
+   */
+  listen: function (key, fn) {
+    if (!this.listenList[key]) {
+      this.listenList[key] = [];
+    }
+    this.listenList[key].push(fn);
+  },
+  
+  /**
+   * 发布消息
+   * @param {string} key 消息类型
+   * @param {any} args 参数
+   */
+  trigger: function () {
+    const key = Array.prototype.shift.call(arguments);
+    const fns = this.listenList[key];
+    if (!fns || fns.length === 0) return false;
+    for (let i = 0, fn; (fn = fns[i]); i++) {
+      fn.apply(this, arguments);
+    }
+  },
+
+  /**
+   * 取消订阅
+   * @param {string} key 消息类型
+   * @param {Function} fn 回调函数
+   */
+  remove: function (key, fn) {
+    const fns = this.listenList[key];
+    if (!fns) return false;
+    if (!fn) {
+      fns.length = 0;
+    } else {
+      for (let len = fns.length - 1; len >= 0; len--) {
+        const _fn = fns[len];
+        if (_fn === fn) {
+          fns.splice(len, 1);
+        }
+      }
+    }
+  },
+};
+
+// 定义包子铺
+const baoziShop = {};
+Object.assign(baoziShop, event);
+
+// 小明订阅菜包子
+baoziShop.listen('菜包子', function (price) {
+  console.log('小明：菜包子价格是', price);
+});
+
+// 小王订阅肉包子
+baoziShop.listen('肉包子', function (price) {
+  console.log('小王：肉包子价格是', price);
+});
+
+// 店主发布菜包子消息
+baoziShop.trigger('菜包子', 2);
+
+// 店主发布肉包子消息
+baoziShop.trigger('肉包子', 3);
+
+// 小明取消订阅菜包子
+baoziShop.remove('菜包子', function (price) {
+  console.log('小明：菜包子价格是', price);
+});
+
+// 小王取消订阅肉包子
+baoziShop.remove('肉包子', function (price) {
+  console.log('小王：肉包子价格是', price);
+});
+```
+
+**输出**：
+
+```
+小明：菜包子价格是 2
+小王：肉包子价格是 3
+```
