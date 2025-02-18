@@ -169,7 +169,8 @@ subtitle:
   source: false
   # If you close the typewriter effect, the subtitle will only show the first line of sub
   sub:
-    - "A blog about technology, life, and everything in between."
+    - "Anyway the wind blows"
+    - "任凭命运之风吹动吧，我的朋友"
 
 # Article layout on the homepage
 # 1: Cover on the left, info on the right
