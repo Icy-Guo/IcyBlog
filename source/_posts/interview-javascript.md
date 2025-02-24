@@ -324,6 +324,34 @@ console.log(counter.getValue());  // 2
 
 **JSONP** 是一种通过 `<script>` 标签来绕过跨域限制的解决方案。它利用了 `<script>` 标签的 src 属性可以访问任何域的特性。
 
+```js
+// 客户端
+<script>
+function test(data) {
+    console.log(data.name);
+}
+</script>
+<script src="http://localhost:8080/jsonp?callback=test"></script>
+```
+
+```js
+// 服务端
+res.send('test({name: "John"})');
+```
+
+这个例子中，服务端返回了一个字符串，字符串中包含了一个回调函数，回调函数的参数是 `data`，`data` 是一个对象，对象中有一个 `name` 属性，值为 `John`。客户端在请求成功后，会执行 `test` 函数，并传入 `data` 参数，打印 `John`。
+
+**JSONP 优缺点**：
+
+- **优点**：
+  - 兼容性好，支持老版本浏览器。
+  - 简单易用，不需要额外配置。
+
+- **缺点**：
+  - 只支持 `GET` 请求。
+  - 安全性较低，容易受到 `XSS` 攻击。
+  - 失败时不会返回状态码。
+
 2. **CORS（Cross-Origin Resource Sharing）**：
 
 **CORS** 是一种现代的跨域解决方案，通过在服务器端设置特定的 HTTP 头来允许跨域请求。
@@ -638,4 +666,236 @@ JavaScript 的数据类型分为两大类：
 - 基本数据类型是不可变的，引用数据类型是可变的。
 - 基本数据类型赋值时创建一个新副本，修改副本不会影响原值。引用数据类型赋值时复制的是引用，指向同一块内存区域，修改其中一个变量会影响另一个变量的值。
 
+## 装饰器
 
+装饰器（`Decorator`）是一种用于修改类或方法行为的函数。它可以在不改变原有代码的情况下，动态地添加、修改或删除类的行为，提高了代码的可维护性和复用性。它使用 `@` 符号来定义，直接定义在类、方法或属性的前面。
+
+装饰器通常用于以下场景：
+
+- 添加日志
+- 添加缓存
+- 添加权限控制
+
+## MobX
+
+MobX 是一个强大且简洁的状态管理库，适合用于需要响应式、可变状态的应用。它通过 `observable`、`action` 和 `computed` 等概念帮助开发者轻松管理和更新应用状态。
+
+**核心概念**：
+
+- `observable`：使对象或属性可观察，当状态变化时触发通知。
+- `action`：定义修改状态的操作，可以是同步或异步的。
+- `computed`：根据状态计算衍生值，当状态变化时自动重新计算。
+
+**示例**：
+
+```js
+import { observable, action, computed } from 'mobx';
+import { observer } from 'mobx-react';
+
+// 定义用户数据对象
+const user = observable({
+  name: 'John',
+  age: 30,
+  
+  // 定义更新状态的动作
+  updateName: action(function(newName) {
+    this.name = newName;
+  }),
+  
+  // 定义计算属性
+  get userInfo() {
+    return `${this.name} is ${this.age} years old`;
+  }
+});
+
+// 定义 React 组件来显示用户信息
+const UserInfo = observer(() => (
+  <div>
+    <p>{user.userInfo}</p>
+    <button onClick={() => user.updateName('Jane')}>Change Name</button>
+  </div>
+));
+
+export default UserInfo;
+```
+
+** MobX 和 Redux 的区别**：
+
+1. **设计理念**
+
+** MobX **
+
+- **响应式编程**：MobX 通过 响应式编程 来管理状态，依赖的状态变化时，自动更新视图。它的核心概念是可观察（observable）数据，计算值（computed values），以及动作（actions）。当数据改变时，相关的组件会自动重新渲染。
+- **简洁和自动化**：MobX 的理念是通过自动管理状态和视图的同步来减少手动操作。你不需要手动调用 `dispatch` 或编写 `reducer` 来更新状态。
+
+** Redux **
+
+- **不可变数据和纯函数**：Redux 强调使用 **不可变数据** 和 **纯函数**。它采用 **动作（actions）** 和 **reducer** 来更新状态。每次状态变化都会生成一个新的状态对象，而不是直接修改原状态。这种设计保证了应用状态的可预测性和可调试性。
+- **明确的状态流**：Redux 强调应用程序中所有的状态更新必须通过明确的动作和reducer来管理，状态的改变过程非常明确。
+
+2. **状态管理**
+
+** MobX **
+
+- **可变状态**：在 MobX 中，状态通常是可变的，通过 `observable` 修饰数据，数据可以直接修改。状态更新时，相关视图会自动更新。
+
+** Redux **
+
+- **不可变状态**：Redux 强制使用不可变的状态，每次对状态的修改都会返回一个新的状态对象，而不是修改原状态对象。
+
+3. **状态更新**
+
+** MobX **
+
+- **自动状态更新**：在 MobX 中，状态变化时，相关视图会自动更新。
+
+** Redux **
+
+- **手动状态更新**：在 Redux 中，所有的状态更新都必须通过 `dispatch` 动作触发，并通过 `reducer` 函数处理。
+
+4. **性能**
+
+** MobX **
+
+- **细粒度更新**：MobX 只会在状态变化时更新与其相关的组件，性能较好，尤其在涉及大量动态状态和高频更新时。
+
+** Redux **
+
+- **全局重渲染**：Redux 中，每次状态更新时，所有相关的组件都可能会重新渲染，即使它们只依赖状态的一小部分。为了优化性能，通常需要手动实现 `shouldComponentUpdate` 或使用 `reselect` 等工具来优化选择器。
+
+**如何选择？**
+
+- **MobX** 适合需要响应式编程、简洁且易于使用的状态管理，特别是当状态的变更和视图的更新之间有很强的关联时。
+- **Redux** 适合需要更明确的状态流和更强的控制、调试能力的大型应用，尤其是涉及复杂异步操作时。
+
+## cookie 和 session
+
+**cookie** 和 **session** 是用于在客户端和服务器之间存储和传输数据的两种机制。
+
+**cookie** 是存储在客户端浏览器中的小型文本文件，用于保存用户信息、偏好设置等。每次 http 请求都会携带 cookie 信息。
+
+**session** 是存储在服务器上的数据，用于保存用户登录状态、购物车数据等需要安全保存的数据。服务器为每个用户创建一个 session 对象，并为其分配一个唯一的 `sessionId`，`sessionId` 通过 `cookie` 存储在客户端浏览器中。
+
+**cookie 和 session 的区别**：
+
+- **存储位置**：cookie 存储在客户端浏览器中，session 存储在服务器上。
+- **存储大小**：cookie 存储的大小有限，session 存储的大小没有限制。
+- **安全性**：cookie 存储在客户端浏览器中，安全性较低，session 存储在服务器上，安全性较高。
+- **生命周期**：cookie 的生命周期可以设置（分为 **会话 cookie （关闭浏览器后自动删除）** 和 **持久 cookie（设置过期时间）**），session 一般有固定的生命周期，可以配置服务器自动清理不活跃的 session。
+
+## Map 和 Object 的区别
+
+**Map** 和 **Object** 是 JavaScript 中用于存储键值对的两种数据结构。
+
+1. **键的类型**
+
+- **Object** 的键必须是字符串或符号。使用其他类型作为键时，会自动转换为字符串。
+- **Map** 的键可以是任意类型，包括对象、数组、函数等。
+
+2. **键的顺序**
+
+- **Object** 的键没有顺序。
+- **Map** 的键保证按照插入的顺序排列。
+
+3. **使用场景**
+
+- **Object** 适合存储结构化数据，如用户信息、配置等。
+- **Map** 适合存储复杂的数据结构，如关系图谱、多对多关系等。
+
+## this 的指向问题
+
+`this` 的指向是动态的，取决于函数的调用方式，而不是函数定义的位置。
+
+1. **全局作用域**
+
+在全局作用域中，`this` 指向全局对象（在浏览器中是 `window`，在 Node.js 中是 `global`）。
+
+```js
+console.log(this); // window (浏览器环境)
+```
+
+2. **函数作用域**
+
+在函数作用域中，`this` 指向调用该函数的对象。
+
+```js
+function showThis() {
+  console.log(this);
+}
+showThis(); // window (浏览器环境)
+```
+
+3. **对象方法**
+
+在对象方法中，`this` 指向调用该方法的对象。
+
+```js
+const user = {
+  name: "John",
+  greet() {
+    console.log(this.name);
+  }
+};
+user.greet(); // "John" (this指向user)
+```
+
+4. **构造函数**
+
+使用 `new` 关键字调用函数时，函数内的 `this` 指向新创建的对象实例。
+
+```js
+function User(name) {
+  this.name = name;
+}
+const user = new User("John");
+console.log(user.name); // "John"
+```
+
+5. **事件处理函数**
+
+在事件处理函数中，`this` 指向触发事件的元素。
+
+```js
+const button = document.querySelector("button");
+button.addEventListener("click", function() {
+  console.log(this); // button
+});
+```
+
+6. **箭头函数**
+
+箭头函数没有自己的 `this`，它会继承外层函数的 `this` 值。
+
+```js
+const obj = {
+  name: "John",
+  // 普通函数方法
+  sayLater1: function() {
+    setTimeout(function() {
+      console.log(this.name); // undefined，因为this指向window
+    }, 1000);
+  },
+  // 箭头函数
+  sayLater2: function() {
+    setTimeout(() => {
+      console.log(this.name); // "John"，因为箭头函数继承了外部this
+    }, 1000);
+  }
+};
+```
+
+7. **显示绑定**
+
+通过 `call`、`apply` 或 `bind` 方法可以明确指定函数执行时的 `this` 值。
+
+```js
+function introduce() {
+  console.log(`I am${this.name}`);
+}
+
+const person = { name: "John" };
+introduce.call(person); // "I am John"
+introduce.apply(person); // "I am John"
+const boundFn = introduce.bind(person);
+boundFn(); // "I am John"
+```
