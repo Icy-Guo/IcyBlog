@@ -36,7 +36,7 @@ arr.join(); //默认以逗号隔开
 arr.join(' '); //无缝链接 将数组元素拼接成字符串
 arr.slice(1, 2); //截取数组的一部分，不包含头部，包含尾部，不会修改原数组
 arr.splice(1, 4); //从索引1开始删除4个元素,第二个是要删除的长度，第三个往后是要添加的元素
-arr.splice(2, 0, 'i'); //从索引2开始，删除0个，加入一个’i‘
+arr.splice(2, 0, 'i'); //从索引2开始，删除0个，加入一个'i'
 arr.splice(3, 1, 'o', 'i'); //从索引3开始，删除1个，添加两个字符串。
 arr.flat(); //数组降维 ，返回新数组
 arr.flat(1); //降维一层
@@ -548,93 +548,61 @@ window.addEventListener('scroll', handleScroll);
 假设我们有一个包子铺（`baoziShop`），当有新包子上架时，店主希望通知所有订阅者。 我们可以使用发布订阅模式来实现这一功能：
 
 ```js
-// 定义事件通道
-const event = {
-  listenList: {}, // 存放订阅者的回调函数
+// 事件总线类
+class EventBus {
+  constructor() {
+    this.subscribers = {}; // 存储订阅者的回调函数, 键是事件类型，值是回调函数数组
+  }
 
-  /**
-   * 订阅消息
-   * @param {string} key 消息类型
-   * @param {Function} fn 回调函数
-   */
-  listen: function (key, fn) {
-    if (!this.listenList[key]) {
-      this.listenList[key] = [];
+  // 订阅事件
+  subscribe(key, fn) {
+    if (!this.subscribers[key]) {
+      this.subscribers[key] = [];
     }
-    this.listenList[key].push(fn);
-  },
-  
-  /**
-   * 发布消息
-   * @param {string} key 消息类型
-   * @param {any} args 参数
-   */
-  trigger: function () {
-    const key = Array.prototype.shift.call(arguments);
-    const fns = this.listenList[key];
-    if (!fns || fns.length === 0) return false;
-    for (let i = 0, fn; (fn = fns[i]); i++) {
-      fn.apply(this, arguments);
-    }
-  },
+    this.subscribers[key].push(fn);
+  }
 
-  /**
-   * 取消订阅
-   * @param {string} key 消息类型
-   * @param {Function} fn 回调函数
-   */
-  remove: function (key, fn) {
-    const fns = this.listenList[key];
-    if (!fns) return false;
+  // 发布事件
+  publish(key, ...args) {
+    const fns = this.subscribers[key];
+    if (!fns || fns.length === 0) return;
+    fns.forEach(fn => fn.apply(this, args));
+  }
+
+  // 取消订阅
+  unsubscribe(key, fn) {
+    const fns = this.subscribers[key];
+    if (!fns) return;
     if (!fn) {
-      fns.length = 0;
+      fns.length = 0; // 清空所有订阅
     } else {
-      for (let len = fns.length - 1; len >= 0; len--) {
-        const _fn = fns[len];
-        if (_fn === fn) {
-          fns.splice(len, 1);
-        }
-      }
+      this.subscribers[key] = fns.filter(item => item !== fn);
     }
-  },
-};
+  }
+}
 
-// 定义包子铺
-const baoziShop = {};
-Object.assign(baoziShop, event);
+// 创建包子铺实例
+const baoziShop = new EventBus();
 
 // 小明订阅菜包子
-baoziShop.listen('菜包子', function (price) {
+const xiaomingFn = (price) => {
   console.log('小明：菜包子价格是', price);
-});
+};
+baoziShop.subscribe('菜包子', xiaomingFn);
 
 // 小王订阅肉包子
-baoziShop.listen('肉包子', function (price) {
+const xiaowangFn = (price) => {
   console.log('小王：肉包子价格是', price);
-});
+};
+baoziShop.subscribe('肉包子', xiaowangFn);
 
-// 店主发布菜包子消息
-baoziShop.trigger('菜包子', 2);
+// 触发事件
+baoziShop.publish('菜包子', 2);  // 小明：菜包子价格是 2
+baoziShop.publish('肉包子', 3);  // 小王：肉包子价格是 3
 
-// 店主发布肉包子消息
-baoziShop.trigger('肉包子', 3);
-
-// 小明取消订阅菜包子
-baoziShop.remove('菜包子', function (price) {
-  console.log('小明：菜包子价格是', price);
-});
-
-// 小王取消订阅肉包子
-baoziShop.remove('肉包子', function (price) {
-  console.log('小王：肉包子价格是', price);
-});
-```
-
-**输出**：
-
-```
-小明：菜包子价格是 2
-小王：肉包子价格是 3
+// 取消订阅
+baoziShop.unsubscribe('菜包子', xiaomingFn);
+baoziShop.unsubscribe('肉包子', xiaowangFn);
 ```
 
 ## JavaScript 的数据类型
@@ -719,47 +687,47 @@ const UserInfo = observer(() => (
 export default UserInfo;
 ```
 
-** MobX 和 Redux 的区别**：
+**MobX 和 Redux 的区别**：
 
 1. **设计理念**
 
-** MobX **
+**MobX**
 
 - **响应式编程**：MobX 通过 响应式编程 来管理状态，依赖的状态变化时，自动更新视图。它的核心概念是可观察（observable）数据，计算值（computed values），以及动作（actions）。当数据改变时，相关的组件会自动重新渲染。
 - **简洁和自动化**：MobX 的理念是通过自动管理状态和视图的同步来减少手动操作。你不需要手动调用 `dispatch` 或编写 `reducer` 来更新状态。
 
-** Redux **
+**Redux**
 
 - **不可变数据和纯函数**：Redux 强调使用 **不可变数据** 和 **纯函数**。它采用 **动作（actions）** 和 **reducer** 来更新状态。每次状态变化都会生成一个新的状态对象，而不是直接修改原状态。这种设计保证了应用状态的可预测性和可调试性。
 - **明确的状态流**：Redux 强调应用程序中所有的状态更新必须通过明确的动作和reducer来管理，状态的改变过程非常明确。
 
 2. **状态管理**
 
-** MobX **
+**MobX**
 
 - **可变状态**：在 MobX 中，状态通常是可变的，通过 `observable` 修饰数据，数据可以直接修改。状态更新时，相关视图会自动更新。
 
-** Redux **
+**Redux**
 
 - **不可变状态**：Redux 强制使用不可变的状态，每次对状态的修改都会返回一个新的状态对象，而不是修改原状态对象。
 
 3. **状态更新**
 
-** MobX **
+**MobX**
 
 - **自动状态更新**：在 MobX 中，状态变化时，相关视图会自动更新。
 
-** Redux **
+**Redux**
 
 - **手动状态更新**：在 Redux 中，所有的状态更新都必须通过 `dispatch` 动作触发，并通过 `reducer` 函数处理。
 
 4. **性能**
 
-** MobX **
+**MobX**
 
 - **细粒度更新**：MobX 只会在状态变化时更新与其相关的组件，性能较好，尤其在涉及大量动态状态和高频更新时。
 
-** Redux **
+**Redux**
 
 - **全局重渲染**：Redux 中，每次状态更新时，所有相关的组件都可能会重新渲染，即使它们只依赖状态的一小部分。为了优化性能，通常需要手动实现 `shouldComponentUpdate` 或使用 `reselect` 等工具来优化选择器。
 

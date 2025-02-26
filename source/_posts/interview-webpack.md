@@ -110,26 +110,26 @@ Webpack 的 热更新（Hot Module Replacement，简称 HMR）是一个非常强
 
 当项目越来越庞大时，Webpack 的打包速度会越来越慢，这时就需要进行打包优化。
 
-1. 优化 loader 配置
+1. **优化 loader 配置**
 - 缩小文件搜索范围，使用 include 和 exclude 指定或者排除需要 loader 搜索的路径
 - 缓存 Babel 编译过的文件，下次只需要编译更改过的代码文件即可，加快打包时间
 
-2. 对 Webpack 的 resolve 参数进行合理配置，使用 resolve 字段告诉 webpack 怎么去搜索文件。
+2. **对 Webpack 的 resolve 参数进行合理配置**，使用 resolve 字段告诉 webpack 怎么去搜索文件。
 
 - `resolve.extensions`: 导入语句没带文件后缀时，webpack 会自动带上后缀后去查找文件是否存在，查询的顺序是按照配置的 resolve.extensions 顺序从前到后查找。所以应该将出现频率高的后缀排在前面
 - `resolve.alias`: 给导入路径取一个别名，能把原导入路径映射成一个新的导入路径
 
-3. 压缩代码
+3. **压缩代码**
 - `webpack-paralle-uglify-plugin`: 多进程执行代码压缩，提升构建速度
 - `uglifyjs-webpack-plugin`: 开启 parallel 参数 (不支持 ES6, webpack4 之前)
 - `terser-webpack-plugin`: 开启 parallel 参数(支持 es6，webpack4)
 - `mini-css-extract-plugin`: 提取 Chunk 中的 CSS 代码到单独文件，通过 css-loader 的 minimize 选项开启 cssnano 压缩 CSS。
 
-4. `DllPlugin` 和 `DllReferencePlugin` 插件
+4. **使用 `DllPlugin` 和 `DllReferencePlugin` 插件**
 - 使用 `DllPlugin` 对某些库（如 React、Vue 等）进行提前打包，避免每次打包都重复打包这些库，只有当类库更新版本才有需要重新打包，提高打包速度
 - 使用 `DllReferencePlugin` 在打包时引用 DllPlugin 打包出的 manifest 文件，避免重复打包
 
-5. `happyPack` 多进程打包
+5. **使用 `happyPack` 多进程打包**
 - 受限于 Node 是单线程运行的，所以 Webpack 在打包的过程中也是单线程的，特别是在执行 Loader 的时候，长时间编译的任务很多，这样就会导致等待的情况。
 - `happyPack` 可以将 Loader 的同步执行转换为并行执行，提升打包速度
 
