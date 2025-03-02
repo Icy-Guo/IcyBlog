@@ -867,3 +867,38 @@ introduce.apply(person); // "I am John"
 const boundFn = introduce.bind(person);
 boundFn(); // "I am John"
 ```
+
+## 手动实现 Promise.all
+
+```js
+function myPromiseAll(promises) {
+  return new Promise((resolve, reject) => {
+    let result = [];
+    let completed = 0;
+
+    // 处理空数组
+    if (promises.length === 0) {
+      return resolve(result);
+    }
+
+    // 遍历所有传入的 promises
+    promises.forEach((promise, index) => {
+      // 确保每个 item 都是一个 Promise
+      Promise.resolve(promise).then(
+        (value) => {
+          result[index] = value;  // 存储每个 Promise 的结果
+          completed += 1;  // 完成的 Promise 数量
+
+          // 如果所有 Promise 都完成，返回最终结果
+          if (completed === promises.length) {
+            resolve(result);
+          }
+        },
+        (error) => {
+          reject(error);  // 一旦有任何 Promise 失败，直接拒绝
+        }
+      );
+    });
+  });
+}
+```
