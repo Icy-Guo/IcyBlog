@@ -139,7 +139,7 @@ console.log("任务继续");
 任务完成
 ```
 
-## 微任务和宏任务
+## 事件循环、微任务和宏任务
 
 1. **微任务**：微任务是由 JavaScript 自身提供的异步任务，如 `Promise` 的 `.then()`、`.catch()`、`.finally()` 回调、`MutationObserver`（用于监听 DOM 变化）。
 
